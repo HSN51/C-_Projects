@@ -1,0 +1,118 @@
+#include <iostream>
+using namespace std;
+
+namespace tomatonamespace
+{
+    int tomatoes = 50;
+
+    void harvest()
+    {
+        if (tomatoes != 0)
+        {
+            int result;
+            double price;
+            cout << "Enter the price of tomatoes: ";
+            cin >> price;
+            result = price * tomatoes;
+            cout << "Total price of tomatoes is " << result << endl;
+        }
+        else
+        {
+            cout << "There are no tomatoes! Harvest first!" << endl;
+        }
+    }
+}
+
+namespace carrotnamespace
+{
+    int carrot = 23;
+
+    void harvest()
+    {
+        if (carrot != 0)
+        {
+            int result;
+            double price;
+            cout << "Enter the price of carrots: ";
+            cin >> price;
+            result = price * carrot;
+            cout << "Total price of carrots is " << result << endl;
+        }
+        else
+        {
+            cout << "There are no carrots! Harvest first!" << endl;
+        }
+    }
+}
+
+namespace carrotandtomato
+{
+    int carrot = 23;
+    int tomatoes = 50;
+
+    void harvest()
+    {
+        if (carrot != 0 && tomatoes != 0)
+        {
+            int result;
+            double price1, price2;
+            cout << "Enter the price of carrots: ";
+            cin >> price1;
+            cout << "Enter the price of tomatoes: ";
+            cin >> price2;
+
+            result = price1 * carrot + price2 * tomatoes;
+            cout << "Total price of carrots and tomatoes is " << result << endl;
+        }
+        else
+        {
+            cout << "There are no carrots and tomatoes! Harvest first!" << endl;
+        }
+    }
+}
+
+using namespace tomatonamespace;
+using namespace carrotnamespace;
+
+int main()
+{
+    int number = 0;
+    while (number != 6)
+    {
+        cout << "Hello! You have two gardens:\n
+        Please enter the garden's number to harvest:
+        \n1) Tomato
+        \n2) Carrot
+        \nOr you can calculate the price of your products:
+        \n3) Calculate Price Of Tomatoes
+        \n4) Calculate Price of Carrots
+        \n5) Calculate the price of both tomatoes and carrots\n6) Exit" << endl;
+        cout << "Option: ";
+        cin >> number;
+
+        switch (number)
+        {
+        case 1:
+            tomatonamespace::harvest();
+            cout << "Total number of tomatoes is " << tomatoes << endl;
+            break;
+        case 2:
+            carrotnamespace::harvest();
+            cout << "Total number of carrots is " << carrot << endl;
+            break;
+        case 3:
+            tomatonamespace::harvest();
+            break;
+        case 4:
+            carrotnamespace::harvest();
+            break;
+        case 5:
+            carrotandtomato::harvest();
+            break;
+        case 6:
+            break;
+        }
+    }
+
+    return 0;
+}
