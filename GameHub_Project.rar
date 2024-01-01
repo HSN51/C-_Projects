@@ -1,1 +1,295 @@
+#include <iostream>
+#include <vector>                               
+                                                //Hasan Hüseyin Gümüştepe
+#include <string>                                                   
+#include <ctime>        //Libraries
+#include <cstdlib>
+using namespace std;
 
+// Player class
+class Player {
+private:
+    string username;
+    string gamePlayed;      //Variables
+    int score;
+public:
+    Player(const string& username) : username(username), score(0) {}
+
+    string getUsername() const {        //Functions
+        return username;
+    }
+
+    void setGamePlayed(const string& game) {
+        gamePlayed = game;
+    }
+
+    string getGamePlayed() const {
+        return gamePlayed;
+    }
+
+    void setScore(int newScore) {
+        score = newScore;
+    }
+
+    int getScore() const {
+        return score;
+    }
+};
+
+// Game base class
+class Game {
+protected:
+    string gameName;                //variables
+    string difficultyLevel;
+    int maxAttempts;
+    int attempts;
+    Player* player;
+public:             //Constructor
+    Game(const string& name, const string& level, int maxAttempts, Player* player)
+        : gameName(name), difficultyLevel(level), maxAttempts(maxAttempts), attempts(0), player(player) {}
+
+    virtual void start() = 0;
+    virtual void end() = 0;
+    virtual void rules() = 0;
+
+    void play() {
+        rules();
+        start();
+        end();
+    }
+};
+
+// Synonym Game class
+class SynonymGame : public Game {
+private:
+    vector<string> words;
+    string chosenWord;
+public:
+    SynonymGame(Player* player) : Game("Find the Synonym", "", 5, player) { //Constructor
+        words = { "happy", "beautiful", "smart", "small", "strong" };
+    }
+
+    void start() {
+        srand(time(0));             //Choose random synonym
+        int index = rand() % words.size();
+        chosenWord = words[index];
+
+        cout << "Word: " << chosenWord << endl;
+
+        string guess;
+        bool correctGuess = false;
+
+        do {
+            cout << "Guess a synonym: ";    //Guest choose synonym word
+            cin >> guess;
+
+            attempts++;
+
+            if (guess == chosenWord) {
+                cout << "Correct guess!" << endl;
+                player->setScore(player->getScore() + maxAttempts - attempts + 1);
+                correctGuess = true;
+            }
+            else {
+                cout << "Wrong guess." << endl;
+                if (attempts < maxAttempts) {
+                    cout << "You have " << maxAttempts - attempts << " attempts left." << endl;
+                }
+            }
+        } while (!correctGuess && attempts < maxAttempts);//Attention
+
+        if (!correctGuess) {
+            cout << "Out of guesses. The synonym was: " << chosenWord << endl;
+        }
+    }
+
+    void end() {//End function
+        cout << "Synonym Game Over" << endl;
+    }
+
+    void rules() {//Rules function
+        cout << "Synonym Game Rules: " << endl;
+        cout << "Guess the synonym of the word provided." << endl;
+        cout << "You have " << maxAttempts << " attempts." << endl;
+    }
+};
+
+// GuessMovie Game class
+class GuessMovieGame : public Game {
+private:
+    vector<string> easyMovies;      //Vectors and string variables
+    vector<string> mediumMovies;
+    vector<string> hardMovies;
+    string chosenMovie;
+    string hiddenMovie;
+public:
+    //Constructor
+    GuessMovieGame(const string& difficultyLevel, Player* player) : Game("GuessMovie", difficultyLevel, 5, player) {
+        easyMovies = { "The Avengers", "Iron Man", "Spider-Man" };
+        mediumMovies = { "The Shawshank Redemption", "Forrest Gump", "Pulp Fiction" };
+        hardMovies = { "The Godfather", "The Dark Knight", "Inception" };
+    }
+
+    void start() {          //Start function Easy Medium Hard
+        vector<string> chosenList;
+
+        if (difficultyLevel == "Easy") {//Guest Select 2 determined difficulty level
+            chosenList = easyMovies;
+        }
+        else if (difficultyLevel == "Medium") {
+            chosenList = mediumMovies;
+        }
+        else if (difficultyLevel == "Hard") {
+            chosenList = hardMovies;
+        }
+
+        srand(time(0));
+        int index = rand() % chosenList.size();
+        chosenMovie = chosenList[index];        //Random Choose Movie name
+
+        hiddenMovie = chosenMovie;
+        for (char& c : hiddenMovie) {   //Show Unknown letters 
+            if (c != ' ') {
+                c = '*';
+            }
+        }
+
+        cout << "Movie: " << hiddenMovie << endl;
+
+        vector<char> correctGuesses; // Vector created to store correctly guessed letters
+
+        char guess;
+        bool correctGuess = false;
+
+        do {
+            cout << "Guess a letter: "; //Guest guess letters 
+            cin >> guess;
+
+            attempts++;
+            correctGuess = false;
+
+            
+            for (int i = 0; i < chosenMovie.length(); i++) {
+                if (tolower(chosenMovie[i]) == tolower(guess)) {
+                    hiddenMovie[i] = chosenMovie[i];
+                    correctGuess = true;
+                    correctGuesses.push_back(chosenMovie[i]); // Add the correctly guessed letter to the vector
+                }
+            }
+
+            cout << "Movie: ";
+           
+            for (int i = 0; i < chosenMovie.length(); i++) {     //Chosen Movie Function control mechanisms
+                if (hiddenMovie[i] != '*') {
+                    cout << hiddenMovie[i];
+                }
+                else {
+                    bool isCorrectGuess = false;
+                    for (char c : correctGuesses) {     //Determine wrong or true correctGuesses
+                        if (tolower(chosenMovie[i]) == tolower(c)) {
+                            isCorrectGuess = true;
+                            break;
+                        }
+                    }
+                    if (isCorrectGuess) {   // iscorrectguess output the chosenmovie elements
+                        cout << chosenMovie[i];
+                    }
+                    else {
+                        cout << '*';
+                    }
+                }
+            }
+
+            cout << endl;
+
+            if (correctGuess) {                     //Control the correctGuess
+                cout << "Correct guess!" << endl;
+                if (hiddenMovie == chosenMovie) {
+                    cout << "Congratulations! You guessed the movie correctly." << endl;
+                    player->setScore(player->getScore() + maxAttempts - attempts + 1);
+                }
+            }
+            else {
+                cout << "Wrong guess." << endl;
+            }
+        } while (attempts < maxAttempts && hiddenMovie != chosenMovie);
+
+        if (hiddenMovie != chosenMovie) {           //Determine wrong or true movieName
+            cout << "Out of guesses. The movie was: " << chosenMovie << endl;
+        }
+    }
+    void end() {        //end function
+        cout << "GuessMovie Game Over" << endl;
+    }
+
+    void rules() {          //Rules
+        cout << "GuessMovie Game Rules: " << endl;
+        cout << "Guess the name of the movie by guessing letters or the whole movie name." << endl;
+        cout << "You have " << maxAttempts << " attempts." << endl;
+    }
+};
+
+// YourGame class
+class YourGame : public Game {
+public:
+    YourGame(Player* player) : Game("Your Game", "", 5, player) {}
+
+    void start() {
+        // Implement your own game logic here
+    }
+    //end function
+    void end() {
+        cout << "Your Game Over" << endl;
+    }
+
+    void rules() {
+        cout << "Your Game Rules: " << endl;
+        // Add rules for your game here
+    }
+};
+
+//Main Function
+int main() {
+    string username;
+    cout << "Enter username: ";
+    cin >> username;
+
+    Player player(username);//Defined object and we appointed
+
+    int choice;
+    do {                    
+        cout << "Main Menu" << endl;
+        cout << "1. Find the Synonym" << endl;      //Main Board
+        cout << "2. GuessMovie" << endl;
+        cout << "3. Your Game" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        if (choice == 1) {                              //Select Choices
+            SynonymGame synonymGame(&player);
+            player.setGamePlayed("Find the Synonym");
+            synonymGame.play();
+        }
+        else if (choice == 2) {     //Guest Select 2 determined difficulty level
+            string difficulty;
+            cout << "Enter difficulty level (Easy/Medium/Hard): ";
+            cin >> difficulty;
+
+            GuessMovieGame guessMovieGame(difficulty, &player);
+            player.setGamePlayed("GuessMovie");
+            guessMovieGame.play();
+        }
+        else if (choice == 3) {
+            YourGame yourGame(&player);
+            player.setGamePlayed("Your Game");
+            yourGame.play();
+        }
+    } while (choice != 4);
+
+    cout << "Thank you for playing!" << endl;               //Outputs and ahow the score board
+    cout << "Player: " << player.getUsername() << endl;
+    cout << "Final Score: " << player.getScore() << endl;
+
+    return 0;
+}
